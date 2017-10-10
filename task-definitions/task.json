@@ -1,0 +1,24 @@
+[
+  {
+    "name": "${CONTAINER_NAME}",
+    "image": "${CONTAINER_REGISTRY}/eq-schema-validator:${CONTAINER_TAG}",
+    "memoryReservation": 128,
+    "essential": true,
+    "portMappings": [
+      {
+        "containerPort": ${CONTAINER_PORT},
+        "hostPort": 0
+      }
+    ],
+    "environment": [
+      ${ENVIRONMENT_VARIABLES}
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-region": "eu-west-1",
+        "awslogs-group": "${LOG_GROUP}"
+      }
+    }
+  }
+]
