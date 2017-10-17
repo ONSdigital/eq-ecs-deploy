@@ -1,7 +1,7 @@
 [
   {
     "name": "${CONTAINER_NAME}",
-    "image": "${CONTAINER_REGISTRY}/eq-schema-validator:${CONTAINER_TAG}",
+    "image": "${CONTAINER_REGISTRY}/${CONTAINER_NAME}:${CONTAINER_TAG}",
     "memoryReservation": 128,
     "essential": true,
     "portMappings": [
