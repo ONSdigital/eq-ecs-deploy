@@ -18,6 +18,10 @@ variable "aws_alb_listener_arn" {
   description = "The ARN of the ALB"
 }
 
+variable "service_name" {
+  description = "The service name used in the URL"
+}
+
 # DNS
 variable "dns_zone_name" {
   description = "Amazon Route53 DNS zone name"
