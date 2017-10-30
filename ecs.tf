@@ -57,6 +57,7 @@ data "template_file" "task" {
 resource "aws_ecs_task_definition" "task_definition" {
   family                = "${var.env}-${var.container_name}"
   container_definitions = "${data.template_file.task.rendered}"
+  task_role_arn         = "${aws_iam_role.task_iam_role.arn}"
 }
 
 resource "aws_ecs_service" "service" {
@@ -137,4 +138,31 @@ resource "aws_cloudwatch_log_group" "log_group" {
 
 output "service_address" {
   value = "https://${aws_route53_record.dns_record.fqdn}"
+}
+
+resource "aws_iam_role" "task_iam_role" {
+  name = "${var.env}_iam_for_${var.container_name}_task"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": ["ecs-tasks.amazonaws.com"]
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "role_policy_task" {
+  count  = "${(var.task_iam_policy_json == "" ? 0 : 1)}"
+  name   = "${var.env}_iam_for_${var.container_name}_task"
+  role   = "${aws_iam_role.task_iam_role.id}"
+  policy = "${var.task_iam_policy_json}"
 }
