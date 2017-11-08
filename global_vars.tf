@@ -66,3 +66,8 @@ variable "healthcheck_path" {
   description = "The path for the Healthcheck path. Should report 200 status"
   default     = "/"
 }
+
+variable "task_iam_policy_json" {
+  description = "The IAM policy to be used by the container task"
+  default     = ""
+}
