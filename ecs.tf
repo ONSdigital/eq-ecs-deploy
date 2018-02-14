@@ -88,7 +88,7 @@ resource "aws_ecs_service" "service" {
   }
 
   lifecycle {
-    ignore_changes = ["placement_strategy"]
+    ignore_changes = ["placement_strategy", "desired_count"]
   }
 }
 
