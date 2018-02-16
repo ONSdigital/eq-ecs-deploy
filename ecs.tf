@@ -73,7 +73,7 @@ resource "aws_ecs_service" "service" {
   name            = "${var.env}-${var.container_name}"
   cluster         = "${data.aws_ecs_cluster.ecs-cluster.id}"
   task_definition = "${aws_ecs_task_definition.task_definition.family}"
-  desired_count   = "${var.applciation_min_tasks}"
+  desired_count   = "${var.application_min_tasks}"
   iam_role        = "${aws_iam_role.service_iam_role.arn}"
 
   placement_strategy {

@@ -57,7 +57,7 @@ variable "container_environment_variables" {
   default = ""
 }
 
-variable "applciation_min_tasks" {
+variable "application_min_tasks" {
   description = "The minimum number of tasks to run"
   default     = "2"
 }
