@@ -59,7 +59,7 @@ variable "container_environment_variables" {
 
 variable "applciation_min_tasks" {
   description = "The minimum number of tasks to run"
-  default     = "1"
+  default     = "2"
 }
 
 variable "healthcheck_path" {
