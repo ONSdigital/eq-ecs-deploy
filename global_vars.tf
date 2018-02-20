@@ -24,7 +24,7 @@ variable "aws_alb_arn" {
 
 variable "alb_listener_path_pattern" {
   description = "The path pattern to match to route to this service"
-  default = "/*"
+  default     = "/*"
 }
 
 variable "service_name" {
@@ -99,4 +99,9 @@ variable "high_cpu_threshold" {
 variable "low_cpu_threshold" {
   description = "The Average CPU usage at which to trigger the low CPU alarm"
   default     = "20"
+}
+
+variable "healthcheck_grace_period_seconds" {
+  description = "Number of seconds to wait before first health check."
+  default     = 5
 }
