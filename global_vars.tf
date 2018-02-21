@@ -10,11 +10,15 @@ variable "aws_access_key" {
   description = "Amazon Web Service Access Key"
 }
 
+variable "vpc_id" {
+  description = "The EQ VPC ID"
+}
+
 variable "ecs_cluster_name" {
   description = "The name of the ECS cluster"
 }
 
-variable "aws_alb_listener_arn" {
+variable "aws_alb_arn" {
   description = "The ARN of the ALB"
 }
 
@@ -52,9 +56,9 @@ variable "container_port" {
 }
 
 variable "container_environment_variables" {
-  type = "string"
+  type        = "string"
   description = "The Environment Variables to pass to the container"
-  default = ""
+  default     = ""
 }
 
 variable "application_min_tasks" {
