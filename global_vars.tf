@@ -22,8 +22,17 @@ variable "aws_alb_arn" {
   description = "The ARN of the ALB"
 }
 
+variable "alb_listener_path_pattern" {
+  description = "The path pattern to match to route to this service"
+  default = "/*"
+}
+
 variable "service_name" {
   description = "The service name used in the URL"
+}
+
+variable "slack_alert_sns_arn" {
+  description = "The ARN of sns topic for slack alerts"
 }
 
 # DNS
@@ -66,6 +75,11 @@ variable "application_min_tasks" {
   default     = "2"
 }
 
+variable "application_max_tasks" {
+  description = "The maximum number of tasks to run"
+  default     = "100"
+}
+
 variable "healthcheck_path" {
   description = "The path for the Healthcheck path. Should report 200 status"
   default     = "/"
@@ -74,4 +88,15 @@ variable "healthcheck_path" {
 variable "task_iam_policy_json" {
   description = "The IAM policy to be used by the container task"
   default     = ""
+}
+
+# Cloudwatch
+variable "high_cpu_threshold" {
+  description = "The Average CPU usage at which to trigger the high CPU alarm"
+  default     = "40"
+}
+
+variable "low_cpu_threshold" {
+  description = "The Average CPU usage at which to trigger the low CPU alarm"
+  default     = "20"
 }

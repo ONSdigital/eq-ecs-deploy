@@ -1,5 +1,5 @@
 resource "aws_alb_target_group" "target_group" {
-  name     = "${var.env}-${var.container_name}"
+  name     = "${var.env}-${var.service_name}"
   port     = 80
   protocol = "HTTP"
   vpc_id   = "${var.vpc_id}"
@@ -26,10 +26,16 @@ resource "aws_alb_listener_rule" "listener_rule" {
     target_group_arn = "${aws_alb_target_group.target_group.arn}"
   }
 
-  condition {
-    field  = "host-header"
-    values = ["${aws_route53_record.dns_record.name}"]
-  }
+  condition = [
+    {
+        field  = "host-header"
+        values = ["${aws_route53_record.dns_record.name}"]
+      },
+      {
+        field  = "path-pattern"
+        values = ["${var.alb_listener_path_pattern}"]
+      },
+  ]
 }
 
 resource "aws_route53_record" "dns_record" {
@@ -52,13 +58,13 @@ data "template_file" "task" {
     "CONTAINER_NAME"        = "${var.container_name}"
     "CONTAINER_TAG"         = "${var.container_tag}"
     "CONTAINER_PORT"        = "${var.container_port}"
-    "LOG_GROUP"             = "${join("-", list(var.env, var.container_name))}"
+    "LOG_GROUP"             = "${join("-", list(var.env, var.service_name))}"
     "ENVIRONMENT_VARIABLES" = "${var.container_environment_variables}"
   }
 }
 
 resource "aws_ecs_task_definition" "task_definition" {
-  family                = "${var.env}-${var.container_name}"
+  family                = "${var.env}-${var.service_name}"
   container_definitions = "${data.template_file.task.rendered}"
   task_role_arn         = "${aws_iam_role.task_iam_role.arn}"
 }
@@ -69,7 +75,7 @@ resource "aws_ecs_service" "service" {
     "aws_alb_listener_rule.listener_rule",
   ]
 
-  name            = "${var.env}-${var.container_name}"
+  name            = "${var.env}-${var.service_name}"
   cluster         = "${data.aws_ecs_cluster.ecs-cluster.id}"
   task_definition = "${aws_ecs_task_definition.task_definition.family}"
   desired_count   = "${var.application_min_tasks}"
@@ -92,7 +98,7 @@ resource "aws_ecs_service" "service" {
 }
 
 resource "aws_iam_role" "service_iam_role" {
-  name = "${var.env}_iam_for_${var.container_name}"
+  name = "${var.env}_iam_for_${var.service_name}"
 
   assume_role_policy = <<EOF
 {
@@ -126,13 +132,13 @@ data "aws_iam_policy_document" "policy_document" {
 }
 
 resource "aws_iam_role_policy" "role_policy" {
-  name   = "${var.env}_iam_for_${var.container_name}"
+  name   = "${var.env}_iam_for_${var.service_name}"
   role   = "${aws_iam_role.service_iam_role.id}"
   policy = "${data.aws_iam_policy_document.policy_document.json}"
 }
 
 resource "aws_cloudwatch_log_group" "log_group" {
-  name = "${var.env}-${var.container_name}"
+  name = "${var.env}-${var.service_name}"
 
   tags {
     Environment = "${var.env}"
@@ -144,7 +150,7 @@ output "service_address" {
 }
 
 resource "aws_iam_role" "task_iam_role" {
-  name = "${var.env}_iam_for_${var.container_name}_task"
+  name = "${var.env}_iam_for_${var.service_name}_task"
 
   assume_role_policy = <<EOF
 {
@@ -165,7 +171,7 @@ EOF
 
 resource "aws_iam_role_policy" "role_policy_task" {
   count  = "${(var.task_iam_policy_json == "" ? 0 : 1)}"
-  name   = "${var.env}_iam_for_${var.container_name}_task"
+  name   = "${var.env}_iam_for_${var.service_name}_task"
   role   = "${aws_iam_role.task_iam_role.id}"
   policy = "${var.task_iam_policy_json}"
 }
