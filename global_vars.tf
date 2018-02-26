@@ -41,6 +41,11 @@ variable "dns_zone_name" {
   default     = "eq.ons.digital."
 }
 
+variable "dns_record_name" {
+  description = "The DNS recored name of an existing Route53 Record to use"
+  default     = ""
+}
+
 # ECS
 variable "listener_rule_priority" {
   description = "The priority to set on the ALB listener rule"
@@ -83,6 +88,11 @@ variable "application_max_tasks" {
 variable "healthcheck_path" {
   description = "The path for the Healthcheck path. Should report 200 status"
   default     = "/"
+}
+
+variable "task_has_iam_policy" {
+  description = "Does this task have an IAM policy attached"
+  default     = false
 }
 
 variable "task_iam_policy_json" {
