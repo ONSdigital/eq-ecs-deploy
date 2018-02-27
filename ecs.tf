@@ -28,13 +28,13 @@ resource "aws_alb_listener_rule" "listener_rule" {
 
   condition = [
     {
-        field  = "host-header"
-        values = ["${aws_route53_record.dns_record.name}"]
-      },
-      {
-        field  = "path-pattern"
-        values = ["${var.alb_listener_path_pattern}"]
-      },
+      field  = "host-header"
+      values = ["${aws_route53_record.dns_record.name}"]
+    },
+    {
+      field  = "path-pattern"
+      values = ["${var.alb_listener_path_pattern}"]
+    },
   ]
 }
 
@@ -75,11 +75,12 @@ resource "aws_ecs_service" "service" {
     "aws_alb_listener_rule.listener_rule",
   ]
 
-  name            = "${var.env}-${var.service_name}"
-  cluster         = "${data.aws_ecs_cluster.ecs-cluster.id}"
-  task_definition = "${aws_ecs_task_definition.task_definition.family}"
-  desired_count   = "${var.application_min_tasks}"
-  iam_role        = "${aws_iam_role.service_iam_role.arn}"
+  name                              = "${var.env}-${var.service_name}"
+  cluster                           = "${data.aws_ecs_cluster.ecs-cluster.id}"
+  task_definition                   = "${aws_ecs_task_definition.task_definition.family}"
+  desired_count                     = "${var.application_min_tasks}"
+  iam_role                          = "${aws_iam_role.service_iam_role.arn}"
+  health_check_grace_period_seconds = "${var.healthcheck_grace_period_seconds}"
 
   placement_strategy {
     type  = "spread"
