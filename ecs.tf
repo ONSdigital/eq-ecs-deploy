@@ -18,6 +18,7 @@ resource "aws_alb_target_group" "target_group" {
 }
 
 resource "aws_alb_listener_rule" "listener_rule" {
+  count        = "${var.dns_record_name == "" ? 1 : 0}"
   listener_arn = "${data.aws_lb_listener.eq.id}"
   priority     = "${var.listener_rule_priority}"
 
@@ -38,7 +39,30 @@ resource "aws_alb_listener_rule" "listener_rule" {
   ]
 }
 
+resource "aws_alb_listener_rule" "listener_rule_existing" {
+  count        = "${var.dns_record_name == "" ? 0 : 1}"
+  listener_arn = "${data.aws_lb_listener.eq.id}"
+  priority     = "${var.listener_rule_priority}"
+
+  action {
+    type             = "forward"
+    target_group_arn = "${aws_alb_target_group.target_group.arn}"
+  }
+
+  condition = [
+    {
+      field  = "host-header"
+      values = ["${var.dns_record_name}"]
+    },
+    {
+      field  = "path-pattern"
+      values = ["${var.alb_listener_path_pattern}"]
+    },
+  ]
+}
+
 resource "aws_route53_record" "dns_record" {
+  count   = "${var.dns_record_name == "" ? 1 : 0}"
   zone_id = "${data.aws_route53_zone.dns_zone.id}"
   name    = "${var.env}-${var.service_name}.${data.aws_route53_zone.dns_zone.name}"
   type    = "A"
@@ -73,6 +97,7 @@ resource "aws_ecs_service" "service" {
   depends_on = [
     "aws_alb_target_group.target_group",
     "aws_alb_listener_rule.listener_rule",
+    "aws_alb_listener_rule.listener_rule_existing",
   ]
 
   name                              = "${var.env}-${var.service_name}"
@@ -147,7 +172,7 @@ resource "aws_cloudwatch_log_group" "log_group" {
 }
 
 output "service_address" {
-  value = "https://${aws_route53_record.dns_record.fqdn}"
+  value = "https://${var.dns_record_name == "" ? aws_route53_record.dns_record.name : var.dns_record_name}"
 }
 
 resource "aws_iam_role" "task_iam_role" {
@@ -171,7 +196,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "role_policy_task" {
-  count  = "${(var.task_iam_policy_json == "" ? 0 : 1)}"
+  count  = "${var.task_has_iam_policy ? 1 : 0}"
   name   = "${var.env}_iam_for_${var.service_name}_task"
   role   = "${aws_iam_role.task_iam_role.id}"
   policy = "${var.task_iam_policy_json}"
