@@ -19,7 +19,7 @@ resource "aws_alb_target_group" "target_group" {
 
 resource "aws_alb_listener_rule" "listener_rule" {
   count        = "${var.dns_record_name == "" ? 1 : 0}"
-  listener_arn = "${data.aws_lb_listener.eq.id}"
+  listener_arn = "${var.aws_alb_listener_arn}"
   priority     = "${var.listener_rule_priority}"
 
   action {
@@ -41,7 +41,7 @@ resource "aws_alb_listener_rule" "listener_rule" {
 
 resource "aws_alb_listener_rule" "listener_rule_existing" {
   count        = "${var.dns_record_name == "" ? 0 : 1}"
-  listener_arn = "${data.aws_lb_listener.eq.id}"
+  listener_arn = "${var.aws_alb_listener_arn}"
   priority     = "${var.listener_rule_priority}"
 
   action {

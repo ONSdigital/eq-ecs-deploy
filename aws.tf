@@ -18,11 +18,6 @@ data "aws_ecs_cluster" "ecs-cluster" {
   cluster_name = "${var.ecs_cluster_name}"
 }
 
-data "aws_lb_listener" "eq" {
-  load_balancer_arn = "${data.aws_lb.eq.arn}"
-  port              = "443"
-}
-
 data "aws_lb" "eq" {
   arn = "${var.aws_alb_arn}"
 }
