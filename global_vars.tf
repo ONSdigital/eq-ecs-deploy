@@ -73,6 +73,11 @@ variable "container_port" {
   description = "The port that the container exposes"
 }
 
+variable "container_memory_reservation" {
+  description = "How much memory should be reserved for this container"
+  default = 128
+}
+
 variable "container_environment_variables" {
   type        = "string"
   description = "The Environment Variables to pass to the container"

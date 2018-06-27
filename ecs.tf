@@ -82,6 +82,7 @@ data "template_file" "task" {
     "CONTAINER_NAME"        = "${var.container_name}"
     "CONTAINER_TAG"         = "${var.container_tag}"
     "CONTAINER_PORT"        = "${var.container_port}"
+    "MEMORY_RESERVATION"    = "${var.container_memory_reservation}"
     "LOG_GROUP"             = "${join("-", list(var.env, var.service_name))}"
     "ENVIRONMENT_VARIABLES" = "${var.container_environment_variables}"
   }

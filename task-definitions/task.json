@@ -2,7 +2,7 @@
   {
     "name": "${CONTAINER_NAME}",
     "image": "${CONTAINER_REGISTRY}/${CONTAINER_NAME}:${CONTAINER_TAG}",
-    "memoryReservation": 128,
+    "memoryReservation": ${MEMORY_RESERVATION},
     "essential": true,
     "portMappings": [
       {
