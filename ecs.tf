@@ -108,7 +108,7 @@ resource "aws_ecs_service" "service" {
   iam_role                          = "${aws_iam_role.service_iam_role.arn}"
   health_check_grace_period_seconds = "${var.healthcheck_grace_period_seconds}"
 
-  placement_strategy {
+  ordered_placement_strategy {
     type  = "spread"
     field = "host"
   }
