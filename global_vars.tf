@@ -75,7 +75,7 @@ variable "container_port" {
 
 variable "container_memory_reservation" {
   description = "How much memory should be reserved for this container"
-  default = 128
+  default     = 128
 }
 
 variable "container_environment_variables" {
