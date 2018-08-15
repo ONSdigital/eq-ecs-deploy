@@ -6,9 +6,10 @@ terraform {
 
 provider "aws" {
   version = ">= 1.9.0"
-
-  access_key = "${var.aws_access_key}"
-  secret_key = "${var.aws_secret_key}"
+  allowed_account_ids = ["${var.aws_account_id}"]
+  assume_role {
+    role_arn  = "${var.aws_assume_role_arn}"
+  }
   region     = "eu-west-1"
 }
 
