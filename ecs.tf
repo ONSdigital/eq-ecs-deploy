@@ -1,8 +1,9 @@
 resource "aws_alb_target_group" "target_group" {
-  name     = "${var.env}-${var.service_name}"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = "${var.vpc_id}"
+  name                 = "${var.env}-${var.service_name}"
+  port                 = 80
+  protocol             = "HTTP"
+  vpc_id               = "${var.vpc_id}"
+  deregistration_delay = 20
 
   health_check = {
     healthy_threshold   = 2
