@@ -39,6 +39,18 @@ variable "slack_alert_sns_arn" {
   description = "The ARN of sns topic for slack alerts"
 }
 
+variable "ecs_subnet_ids" {
+  description = "The Subnet Ids where ecs runs"
+  type        = "list"
+  default     = []
+}
+
+variable "ecs_alb_security_group" {
+  description = "The security group that allows access from the LB"
+  type        = "list"
+  default     = []
+}
+
 # DNS
 variable "dns_zone_name" {
   description = "Amazon Route53 DNS zone name"
@@ -51,6 +63,21 @@ variable "dns_record_name" {
 }
 
 # ECS
+variable "launch_type" {
+  description = "Where to launch the container"
+  default     = "EC2"
+}
+
+variable "cpu_units" {
+  description = "The number of cpu units used by the task"
+  default     = "1024"
+}
+
+variable "memory_units" {
+  description = "The amount (in MiB) of memory used by the task"
+  default     = "2048"
+}
+
 variable "listener_rule_priority" {
   description = "The priority to set on the ALB listener rule"
 }
@@ -122,5 +149,5 @@ variable "low_cpu_threshold" {
 
 variable "healthcheck_grace_period_seconds" {
   description = "Number of seconds to wait before first health check."
-  default     = 5
+  default     = 60
 }

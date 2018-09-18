@@ -10,7 +10,7 @@ resource "aws_cloudwatch_metric_alarm" "service_high_cpu" {
 
   dimensions {
     ClusterName = "${data.aws_ecs_cluster.ecs-cluster.cluster_name}"
-    ServiceName = "${aws_ecs_service.service.name}"
+    ServiceName = "${var.env}-${var.service_name}"
   }
 
   alarm_description = "This metric monitors ${var.service_name} ECS Service cpu utilization"
@@ -29,7 +29,7 @@ resource "aws_cloudwatch_metric_alarm" "service_low_cpu" {
 
   dimensions {
     ClusterName = "${data.aws_ecs_cluster.ecs-cluster.cluster_name}"
-    ServiceName = "${aws_ecs_service.service.name}"
+    ServiceName = "${var.env}-${var.service_name}"
   }
 
   alarm_description = "This metric monitors ${var.service_name} ECS Service cpu utilization"

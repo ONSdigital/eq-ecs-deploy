@@ -7,7 +7,7 @@
     "portMappings": [
       {
         "containerPort": ${CONTAINER_PORT},
-        "hostPort": 0
+        "hostPort": ${HOST_PORT}
       }
     ],
     "environment": [
@@ -17,7 +17,8 @@
       "logDriver": "awslogs",
       "options": {
         "awslogs-region": "eu-west-1",
-        "awslogs-group": "${LOG_GROUP}"
+        "awslogs-group": "${LOG_GROUP}",
+        "awslogs-stream-prefix": "${ENV}"
       }
     }
   }
