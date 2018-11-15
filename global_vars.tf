@@ -28,7 +28,8 @@ variable "aws_alb_listener_arn" {
 
 variable "alb_listener_path_pattern" {
   description = "The path pattern to match to route to this service"
-  default     = "/*"
+  type        = "list"
+  default     = ["/*"]
 }
 
 variable "service_name" {

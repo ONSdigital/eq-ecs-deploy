@@ -20,9 +20,9 @@ resource "aws_alb_target_group" "target_group" {
 }
 
 resource "aws_alb_listener_rule" "listener_rule" {
-  count        = "${var.dns_record_name == "" ? 1 : 0}"
+  count        = "${var.dns_record_name == "" ? length(var.alb_listener_path_pattern) : 0}"
   listener_arn = "${var.aws_alb_listener_arn}"
-  priority     = "${var.listener_rule_priority}"
+  priority     = "${var.listener_rule_priority + count.index}"
 
   action {
     type             = "forward"
@@ -36,15 +36,15 @@ resource "aws_alb_listener_rule" "listener_rule" {
     },
     {
       field  = "path-pattern"
-      values = ["${var.alb_listener_path_pattern}"]
+      values = ["${element(var.alb_listener_path_pattern, count.index)}"]
     },
   ]
 }
 
 resource "aws_alb_listener_rule" "listener_rule_existing" {
-  count        = "${var.dns_record_name == "" ? 0 : 1}"
+  count        = "${var.dns_record_name == "" ? 0 : length(var.alb_listener_path_pattern)}"
   listener_arn = "${var.aws_alb_listener_arn}"
-  priority     = "${var.listener_rule_priority}"
+  priority     = "${var.listener_rule_priority + count.index}"
 
   action {
     type             = "forward"
@@ -58,7 +58,7 @@ resource "aws_alb_listener_rule" "listener_rule_existing" {
     },
     {
       field  = "path-pattern"
-      values = ["${var.alb_listener_path_pattern}"]
+      values = ["${element(var.alb_listener_path_pattern, count.index)}"]
     },
   ]
 }
@@ -125,7 +125,7 @@ resource "aws_cloudwatch_log_group" "log_group" {
 }
 
 output "service_address" {
-  value = "https://${var.dns_record_name == "" ? aws_route53_record.dns_record.name : var.dns_record_name}"
+  value = "https://${element(coalescelist(aws_route53_record.dns_record.*.name, list(var.dns_record_name)), 0)}"
 }
 
 resource "aws_iam_role" "task_iam_role" {
