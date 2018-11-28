@@ -64,7 +64,7 @@ variable "dns_record_name" {
 
 # ECS
 variable "launch_type" {
-  description = "Where to launch the container"
+  description = "Where to launch the container. Either FARGATE or EC2"
   default     = "EC2"
 }
 
@@ -149,5 +149,5 @@ variable "low_cpu_threshold" {
 
 variable "healthcheck_grace_period_seconds" {
   description = "Number of seconds to wait before first health check."
-  default     = 60
+  default     = 5
 }
