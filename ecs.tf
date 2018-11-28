@@ -4,6 +4,7 @@ resource "aws_alb_target_group" "target_group" {
   protocol             = "HTTP"
   vpc_id               = "${var.vpc_id}"
   deregistration_delay = 20
+  target_type          = "${var.launch_type == "EC2" ? "instance" : "ip"}"
 
   health_check = {
     healthy_threshold   = 2
@@ -72,56 +73,6 @@ resource "aws_route53_record" "dns_record" {
     name                   = "${data.aws_lb.eq.dns_name}"
     zone_id                = "${data.aws_lb.eq.zone_id}"
     evaluate_target_health = false
-  }
-}
-
-data "template_file" "task" {
-  template = "${file("${path.module}/task-definitions/task.json")}"
-
-  vars = {
-    "CONTAINER_REGISTRY"    = "${var.docker_registry}"
-    "CONTAINER_NAME"        = "${var.container_name}"
-    "CONTAINER_TAG"         = "${var.container_tag}"
-    "CONTAINER_PORT"        = "${var.container_port}"
-    "MEMORY_RESERVATION"    = "${var.container_memory_reservation}"
-    "LOG_GROUP"             = "${join("-", list(var.env, var.service_name))}"
-    "ENVIRONMENT_VARIABLES" = "${var.container_environment_variables}"
-  }
-}
-
-resource "aws_ecs_task_definition" "task_definition" {
-  family                = "${var.env}-${var.service_name}"
-  container_definitions = "${data.template_file.task.rendered}"
-  task_role_arn         = "${aws_iam_role.task_iam_role.arn}"
-}
-
-resource "aws_ecs_service" "service" {
-  depends_on = [
-    "aws_alb_target_group.target_group",
-    "aws_alb_listener_rule.listener_rule",
-    "aws_alb_listener_rule.listener_rule_existing",
-  ]
-
-  name                              = "${var.env}-${var.service_name}"
-  cluster                           = "${data.aws_ecs_cluster.ecs-cluster.id}"
-  task_definition                   = "${aws_ecs_task_definition.task_definition.family}"
-  desired_count                     = "${var.application_min_tasks}"
-  iam_role                          = "${aws_iam_role.service_iam_role.arn}"
-  health_check_grace_period_seconds = "${var.healthcheck_grace_period_seconds}"
-
-  ordered_placement_strategy {
-    type  = "spread"
-    field = "host"
-  }
-
-  load_balancer {
-    target_group_arn = "${aws_alb_target_group.target_group.arn}"
-    container_name   = "${var.container_name}"
-    container_port   = "${var.container_port}"
-  }
-
-  lifecycle {
-    ignore_changes = ["placement_strategy", "desired_count"]
   }
 }
 
@@ -202,4 +153,71 @@ resource "aws_iam_role_policy" "role_policy_task" {
   name   = "${var.env}_iam_for_${var.service_name}_task"
   role   = "${aws_iam_role.task_iam_role.id}"
   policy = "${var.task_iam_policy_json}"
+}
+
+resource "aws_iam_role" "ecs_execution_iam_role" {
+  name = "${var.env}-iam-for-${var.service_name}-execution"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": ["ecs.amazonaws.com", "ecs-tasks.amazonaws.com"]
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "ecs_execution_role_policy" {
+  name   = "${var.env}-iam-for-${var.service_name}-execution"
+  role   = "${aws_iam_role.ecs_execution_iam_role.id}"
+  policy = "${data.aws_iam_policy_document.ecs_execution_service_policy_document.json}"
+}
+
+data "aws_iam_policy_document" "ecs_execution_service_policy_document" {
+  "statement" = {
+    "effect" = "Allow"
+
+    "actions" = [
+      "elasticloadbalancing:*",
+    ]
+
+    "resources" = [
+      "*",
+    ]
+  }
+
+  "statement" = {
+    "effect" = "Allow"
+
+    "actions" = [
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer",
+    ]
+
+    "resources" = [
+      "*",
+    ]
+  }
+
+  "statement" = {
+    "effect" = "Allow"
+
+    "actions" = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+
+    "resources" = [
+      "*",
+    ]
+  }
 }
