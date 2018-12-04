@@ -20,7 +20,7 @@ resource "aws_alb_target_group" "target_group" {
 }
 
 resource "aws_alb_listener_rule" "listener_rule" {
-  count        = "${var.dns_record_name == "" ? length(var.alb_listener_path_pattern) : 0}"
+  count        = "${var.dns_record_name == "" ? length(var.alb_listener_path_patterns) : 0}"
   listener_arn = "${var.aws_alb_listener_arn}"
   priority     = "${var.listener_rule_priority + count.index}"
 
@@ -36,13 +36,13 @@ resource "aws_alb_listener_rule" "listener_rule" {
     },
     {
       field  = "path-pattern"
-      values = ["${element(var.alb_listener_path_pattern, count.index)}"]
+      values = ["${element(var.alb_listener_path_patterns, count.index)}"]
     },
   ]
 }
 
 resource "aws_alb_listener_rule" "listener_rule_existing" {
-  count        = "${var.dns_record_name == "" ? 0 : length(var.alb_listener_path_pattern)}"
+  count        = "${var.dns_record_name == "" ? 0 : length(var.alb_listener_path_patterns)}"
   listener_arn = "${var.aws_alb_listener_arn}"
   priority     = "${var.listener_rule_priority + count.index}"
 
@@ -58,7 +58,7 @@ resource "aws_alb_listener_rule" "listener_rule_existing" {
     },
     {
       field  = "path-pattern"
-      values = ["${element(var.alb_listener_path_pattern, count.index)}"]
+      values = ["${element(var.alb_listener_path_patterns, count.index)}"]
     },
   ]
 }
