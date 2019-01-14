@@ -26,9 +26,10 @@ variable "aws_alb_listener_arn" {
   description = "The ARN of the ALB"
 }
 
-variable "alb_listener_path_pattern" {
-  description = "The path pattern to match to route to this service"
-  default     = "/*"
+variable "alb_listener_path_patterns" {
+  description = "A list of path pattern to match to route to this service"
+  type        = "list"
+  default     = ["/*"]
 }
 
 variable "service_name" {
@@ -150,4 +151,37 @@ variable "low_cpu_threshold" {
 variable "healthcheck_grace_period_seconds" {
   description = "Number of seconds to wait before first health check."
   default     = 5
+}
+
+# Auth
+variable "auth_issuer" {
+  default = ""
+}
+
+variable "auth_endpoint" {
+  default = ""
+}
+
+variable "auth_token_endpoint" {
+  default = ""
+}
+
+variable "auth_user_info_endpoint" {
+  default = ""
+}
+
+variable "auth_client_id" {
+  default = ""
+}
+
+variable "auth_client_secret" {
+  default = ""
+}
+
+variable "auth_unauth_action" {
+  default = ""
+}
+
+variable "auth_scope" {
+  default = "openid profile email"
 }

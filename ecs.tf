@@ -20,9 +20,9 @@ resource "aws_alb_target_group" "target_group" {
 }
 
 resource "aws_alb_listener_rule" "listener_rule" {
-  count        = "${var.dns_record_name == "" ? 1 : 0}"
+  count        = "${var.auth_issuer == "" ? length(var.alb_listener_path_patterns) : 0}"
   listener_arn = "${var.aws_alb_listener_arn}"
-  priority     = "${var.listener_rule_priority}"
+  priority     = "${var.listener_rule_priority + count.index}"
 
   action {
     type             = "forward"
@@ -32,19 +32,34 @@ resource "aws_alb_listener_rule" "listener_rule" {
   condition = [
     {
       field  = "host-header"
-      values = ["${aws_route53_record.dns_record.name}"]
+      values = ["${coalescelist(aws_route53_record.dns_record.*.name, list(var.dns_record_name))}"]
     },
     {
       field  = "path-pattern"
-      values = ["${var.alb_listener_path_pattern}"]
+      values = ["${element(var.alb_listener_path_patterns, count.index)}"]
     },
   ]
 }
 
-resource "aws_alb_listener_rule" "listener_rule_existing" {
-  count        = "${var.dns_record_name == "" ? 0 : 1}"
+resource "aws_alb_listener_rule" "listener_rule_auth" {
+  count        = "${var.auth_issuer != "" ? length(var.alb_listener_path_patterns) : 0}"
   listener_arn = "${var.aws_alb_listener_arn}"
-  priority     = "${var.listener_rule_priority}"
+  priority     = "${var.listener_rule_priority + count.index}"
+
+  action {
+    type = "authenticate-oidc"
+
+    authenticate_oidc {
+      authorization_endpoint     = "${var.auth_endpoint}"
+      client_id                  = "${var.auth_client_id}"
+      client_secret              = "${var.auth_client_secret}"
+      issuer                     = "${var.auth_issuer}"
+      token_endpoint             = "${var.auth_token_endpoint}"
+      user_info_endpoint         = "${var.auth_user_info_endpoint}"
+      on_unauthenticated_request = "${var.auth_unauth_action}"
+      scope                      = "${var.auth_scope}"
+    }
+  }
 
   action {
     type             = "forward"
@@ -54,11 +69,11 @@ resource "aws_alb_listener_rule" "listener_rule_existing" {
   condition = [
     {
       field  = "host-header"
-      values = ["${var.dns_record_name}"]
+      values = ["${coalescelist(aws_route53_record.dns_record.*.name, list(var.dns_record_name))}"]
     },
     {
       field  = "path-pattern"
-      values = ["${var.alb_listener_path_pattern}"]
+      values = ["${element(var.alb_listener_path_patterns, count.index)}"]
     },
   ]
 }
@@ -125,7 +140,7 @@ resource "aws_cloudwatch_log_group" "log_group" {
 }
 
 output "service_address" {
-  value = "https://${var.dns_record_name == "" ? aws_route53_record.dns_record.name : var.dns_record_name}"
+  value = "https://${element(coalescelist(aws_route53_record.dns_record.*.name, list(var.dns_record_name)), 0)}"
 }
 
 resource "aws_iam_role" "task_iam_role" {
