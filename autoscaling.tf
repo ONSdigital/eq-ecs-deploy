@@ -1,8 +1,9 @@
 resource "aws_appautoscaling_target" "ecs_service_target" {
   depends_on = [
     "aws_ecs_service.service",
-    "aws_ecs_service.fargate_service"
+    "aws_ecs_service.fargate_service",
   ]
+
   min_capacity       = "${var.application_min_tasks}"
   max_capacity       = "${var.application_max_tasks}"
   resource_id        = "service/${data.aws_ecs_cluster.ecs-cluster.cluster_name}/${var.env}-${var.service_name}"

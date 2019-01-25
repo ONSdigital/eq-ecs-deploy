@@ -32,7 +32,7 @@ resource "aws_ecs_service" "service" {
   depends_on = [
     "aws_alb_target_group.target_group",
     "aws_alb_listener_rule.listener_rule",
-    "aws_alb_listener_rule.listener_rule_existing",
+    "aws_alb_listener_rule.listener_rule_auth",
   ]
 
   name                              = "${var.env}-${var.service_name}"
