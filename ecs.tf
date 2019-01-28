@@ -1,3 +1,11 @@
+resource "null_resource" "aws_alb_exists" {
+  # Fake resource to add a dependency on the ALB.
+  # https://github.com/hashicorp/terraform/issues/12634
+  triggers {
+    alb_name = "${var.aws_alb_arn}"
+  }
+}
+
 resource "aws_alb_target_group" "target_group" {
   name                 = "${var.env}-${var.service_name}"
   port                 = 80
@@ -14,13 +22,16 @@ resource "aws_alb_target_group" "target_group" {
     path                = "${var.healthcheck_path}"
   }
 
+  # Fake dependency to avoid error with target group
+  depends_on = ["null_resource.aws_alb_exists"]
+
   tags {
     Environment = "${var.env}"
   }
 }
 
 resource "aws_alb_listener_rule" "listener_rule" {
-  count        = "${var.auth_issuer == "" ? length(var.alb_listener_path_patterns) : 0}"
+  count        = "${var.auth_issuer == "" && var.aws_alb_use_host_header ? length(var.alb_listener_path_patterns) : 0}"
   listener_arn = "${var.aws_alb_listener_arn}"
   priority     = "${var.listener_rule_priority + count.index}"
 
@@ -38,6 +49,24 @@ resource "aws_alb_listener_rule" "listener_rule" {
       field  = "path-pattern"
       values = ["${element(var.alb_listener_path_patterns, count.index)}"]
     },
+  ]
+}
+
+resource "aws_alb_listener_rule" "listener_rule_no_host" {
+  count        = "${var.auth_issuer == "" && !var.aws_alb_use_host_header ? length(var.alb_listener_path_patterns) : 0}"
+  listener_arn = "${var.aws_alb_listener_arn}"
+  priority     = "${var.listener_rule_priority + count.index}"
+
+  action {
+    type             = "forward"
+    target_group_arn = "${aws_alb_target_group.target_group.arn}"
+  }
+
+  condition = [
+    {
+      field  = "path-pattern"
+      values = ["${element(var.alb_listener_path_patterns, count.index)}"]
+    }
   ]
 }
 
