@@ -1,5 +1,17 @@
 [
   {
+    "name": "xray-daemon",
+    "image": "amazon/aws-xray-daemon",
+    "cpu": 32,
+    "memoryReservation": 256,
+    "portMappings" : [
+      {
+        "containerPort": 2000,
+        "protocol": "udp"
+      }
+    ]
+  },
+  {
     "name": "${CONTAINER_NAME}",
     "image": "${CONTAINER_REGISTRY}/${CONTAINER_NAME}:${CONTAINER_TAG}",
     "memoryReservation": ${MEMORY_RESERVATION},
