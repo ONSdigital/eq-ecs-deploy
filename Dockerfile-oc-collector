@@ -1,0 +1,5 @@
+FROM omnition/opencensus-agent:0.1.7
+
+CMD ["--config=/etc/oc-collector-config.yaml"]
+
+COPY oc-collector-config.yaml /etc/oc-collector-config.yaml

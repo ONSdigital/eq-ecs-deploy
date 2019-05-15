@@ -1,0 +1,9 @@
+receivers:
+  opencensus:
+    port: 55678
+
+exporters:
+  aws-xray:
+    default_service_name: "opencensus"
+    version: "latest"
+    buffer_size: 200
