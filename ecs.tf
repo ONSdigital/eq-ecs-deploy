@@ -168,6 +168,14 @@ resource "aws_cloudwatch_log_group" "log_group" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "log_group_openccensus_collector" {
+  name = "${var.env}-${var.service_name}-openccensus-collector"
+
+  tags {
+    Environment = "${var.env}"
+  }
+}
+
 output "service_address" {
   value = "https://${element(coalescelist(aws_route53_record.dns_record.*.name, list(var.dns_record_name)), 0)}"
 }
