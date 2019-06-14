@@ -30,6 +30,10 @@ resource "aws_alb_target_group" "target_group" {
   }
 }
 
+output "target_group_arn" {
+  value = "${aws_alb_target_group.target_group.arn}"
+}
+
 resource "aws_alb_listener_rule" "listener_rule" {
   count        = "${var.auth_issuer == "" && var.aws_alb_use_host_header ? length(var.alb_listener_path_patterns) : 0}"
   listener_arn = "${var.aws_alb_listener_arn}"
