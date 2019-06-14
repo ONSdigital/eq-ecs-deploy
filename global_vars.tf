@@ -190,3 +190,8 @@ variable "auth_unauth_action" {
 variable "auth_scope" {
   default = "openid profile email"
 }
+
+variable "listener_rule_host_header" {
+  description = "A variable that can be set to override the host header"
+  default = ""
+}

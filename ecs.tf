@@ -47,7 +47,7 @@ resource "aws_alb_listener_rule" "listener_rule" {
   condition = [
     {
       field  = "host-header"
-      values = ["${coalescelist(aws_route53_record.dns_record.*.name, list(var.dns_record_name))}"]
+      values = ["${var.listener_rule_host_header == "" ? coalescelist(aws_route53_record.dns_record.*.name, list(var.dns_record_name)) : var.listener_rule_host_header}"]
     },
     {
       field  = "path-pattern"
