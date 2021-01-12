@@ -127,6 +127,16 @@ variable "application_max_tasks" {
   default     = "100"
 }
 
+variable "healthcheck_interval" {
+  description = "The interval in seconds between healthchecks"
+  default     = "5"
+}
+
+variable "healthcheck_timeout" {
+  description = "The time to wait for a responce from the instane in seconds"
+  default     = "2"
+}
+
 variable "healthcheck_path" {
   description = "The path for the Healthcheck path. Should report 200 status"
   default     = "/"
